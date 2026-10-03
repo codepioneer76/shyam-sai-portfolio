@@ -1,0 +1,200 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+  THE ROYAL ARCHIVE
+  Materials are made, not downloaded: grain, parchment fibre, wood, velvet and
+  gilding are all gradients, SVG filters and masks. Nothing here fetches an asset.
+*/
+
+:root {
+  --ink: #0a0706;
+  --wine: #3a0d12;
+  --maroon: #5a1720;
+  --gold: #c9a45c;
+  --parchment: #e7d6b4;
+  color-scheme: dark;
+}
+
+html {
+  background: var(--ink);
+}
+
+body {
+  margin: 0;
+  background: var(--ink);
+  color: var(--parchment);
+  font-family: theme('fontFamily.body');
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  overflow-x: hidden;
+}
+
+::selection {
+  background: rgba(139, 30, 45, 0.55);
+  color: #f2e9d8;
+}
+
+:focus-visible {
+  outline: 1px solid var(--gold);
+  outline-offset: 4px;
+}
+
+/* ---------------------------------------------------------------- surfaces */
+
+/* Film grain. One SVG turbulence, tiled, animated in steps so it never crawls. */
+.grain::after {
+  content: '';
+  position: fixed;
+  inset: -50%;
+  pointer-events: none;
+  z-index: 60;
+  opacity: 0.055;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)'/%3E%3C/svg%3E");
+  animation: grain 1.2s steps(4) infinite;
+}
+@keyframes grain {
+  0% { transform: translate(0, 0); }
+  25% { transform: translate(-2%, 1%); }
+  50% { transform: translate(1%, -2%); }
+  75% { transform: translate(-1%, -1%); }
+  100% { transform: translate(0, 0); }
+}
+
+/* Vignette over everything: the corners of every room stay unlit. */
+.vignette::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 55;
+  background: radial-gradient(ellipse at 50% 45%, transparent 30%, rgba(0, 0, 0, 0.55) 78%, rgba(0, 0, 0, 0.92) 100%);
+}
+
+/* Aged paper: fibre flecks over a warm wash. */
+.parchment-surface {
+  background-color: #ded0b0;
+  background-image:
+    radial-gradient(circle at 18% 22%, rgba(120, 92, 52, 0.16) 0 2px, transparent 3px),
+    radial-gradient(circle at 72% 64%, rgba(120, 92, 52, 0.13) 0 2px, transparent 3px),
+    radial-gradient(circle at 44% 86%, rgba(120, 92, 52, 0.1) 0 1.5px, transparent 3px),
+    radial-gradient(ellipse at 30% 20%, rgba(90, 60, 28, 0.18), transparent 62%),
+    radial-gradient(ellipse at 78% 78%, rgba(90, 60, 28, 0.2), transparent 64%),
+    linear-gradient(150deg, #e7d6b4 0%, #dcc9a3 55%, #cdb88e 100%);
+  background-blend-mode: normal;
+  color: #2a1c10;
+  box-shadow: inset 0 0 70px rgba(74, 46, 18, 0.4), 0 30px 80px rgba(0, 0, 0, 0.7);
+}
+
+/* Quarter-sawn wood panelling. */
+.wood {
+  background-color: #2a1712;
+  background-image:
+    repeating-linear-gradient(90deg, rgba(0, 0, 0, 0.5) 0 1px, transparent 1px 46px),
+    repeating-linear-gradient(90deg, rgba(120, 70, 40, 0.12) 0 2px, transparent 2px 13px),
+    linear-gradient(180deg, rgba(0, 0, 0, 0.65), transparent 40%, rgba(0, 0, 0, 0.8));
+}
+
+/* Velvet: a nap that shifts with the fold direction. */
+.velvet {
+  background-color: #3a0d12;
+  background-image:
+    repeating-linear-gradient(92deg, rgba(0, 0, 0, 0.55) 0 2px, rgba(138, 34, 50, 0.16) 2px 9px, rgba(0, 0, 0, 0.45) 9px 22px),
+    linear-gradient(180deg, rgba(0, 0, 0, 0.75), rgba(90, 23, 32, 0.35) 45%, rgba(0, 0, 0, 0.9));
+}
+
+/* Tooled leather for the case shell. */
+.leather {
+  background-color: #23150f;
+  background-image:
+    radial-gradient(circle at 20% 30%, rgba(140, 96, 56, 0.1) 0 8px, transparent 9px),
+    radial-gradient(circle at 62% 71%, rgba(140, 96, 56, 0.08) 0 7px, transparent 8px),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.4' numOctaves='2' seed='7'/%3E%3CfeColorMatrix values='0 0 0 0 0.1  0 0 0 0 0.05  0 0 0 0 0.03  0 0 0 0.55 0'/%3E%3C/filter%3E%3Crect width='220' height='220' filter='url(%23g)'/%3E%3C/svg%3E"),
+    radial-gradient(ellipse at 30% 20%, rgba(120, 70, 44, 0.22), transparent 60%),
+    linear-gradient(155deg, #352016, #1b100b 62%, #100906);
+}
+
+/* Gilding: a hairline that catches light, never a filled block. */
+.gilt {
+  border-image: linear-gradient(90deg, transparent, rgba(201, 164, 92, 0.85), transparent) 1;
+}
+
+.rule-gold {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(201, 164, 92, 0.75), transparent);
+}
+
+/* ---------------------------------------------------------------- motion */
+
+.reveal {
+  opacity: 0;
+  transform: translateY(26px);
+  transition: opacity 1.5s cubic-bezier(0.22, 1, 0.36, 1), transform 1.5s cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: opacity, transform;
+}
+.reveal[data-shown='true'] {
+  opacity: 1;
+  transform: none;
+}
+
+/* Candle flame: two out-of-phase wobbles so it never reads as a loop. */
+@keyframes flame {
+  0%, 100% { transform: scale(1, 1) translateX(0); opacity: 0.95; }
+  22% { transform: scale(0.94, 1.08) translateX(-0.4px); opacity: 1; }
+  48% { transform: scale(1.05, 0.95) translateX(0.5px); opacity: 0.88; }
+  71% { transform: scale(0.97, 1.04) translateX(-0.2px); opacity: 1; }
+}
+@keyframes halo {
+  0%, 100% { opacity: 0.5; transform: scale(1); }
+  35% { opacity: 0.68; transform: scale(1.07); }
+  67% { opacity: 0.44; transform: scale(0.96); }
+}
+@keyframes sway {
+  0%, 100% { transform: rotate(-0.28deg); }
+  50% { transform: rotate(0.28deg); }
+}
+@keyframes drift {
+  from { transform: translate3d(0, 0, 0); }
+  to { transform: translate3d(14px, -120px, 0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .grain::after,
+  [class*='animate-'],
+  .flame,
+  .mote {
+    animation: none !important;
+  }
+  .reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+/* Screen-reader only, used by the index and map landmarks. */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+@keyframes recordIn {
+  from { opacity: 0; transform: translateY(18px) rotate(-0.8deg); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes manuscriptOpen {
+  0% { opacity: 0; transform: perspective(900px) rotateX(-18deg) translateY(22px) scaleY(0.92); }
+  100% { opacity: 1; transform: none; }
+}
