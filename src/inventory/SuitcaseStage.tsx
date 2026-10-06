@@ -120,17 +120,18 @@ export function SuitcaseStage(): JSX.Element {
     <div className="mx-auto w-full max-w-5xl">
       <div
         ref={wrap}
-        className="relative mx-auto aspect-[4/3] w-full md:aspect-[16/10]"
+        className={`relative mx-auto w-full ${mode === '2d' ? '' : 'aspect-[4/3] md:aspect-[16/10]'}`}
         style={{
           background: 'radial-gradient(ellipse 55% 50% at 50% 58%, rgba(255,176,96,0.13) 0%, transparent 70%)',
         }}
       >
         {mode === '3d' && near ? (
-          <WebGLBoundary fallback={<div className="flex h-full items-center"><Case /></div>}>
+          <WebGLBoundary fallback={<div className="flex items-center py-6"><Case /></div>}>
             <Suitcase3D tier={tier} reduced={reduced} active={visible} onStruggling={() => setMode('2d')} />
           </WebGLBoundary>
         ) : mode === '2d' ? (
-          <div className="flex h-full items-center">
+          // The drawn case sizes itself; a fixed aspect frame let it overflow onto its own controls on phones.
+          <div className="flex items-center py-6">
             <Case />
           </div>
         ) : (

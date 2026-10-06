@@ -21,6 +21,14 @@ html {
   background: var(--ink);
 }
 
+/* On narrow screens the room bar is fixed along the bottom edge; keep anything
+   scrolled or focused into view clear of it instead of underneath it. */
+@media (max-width: 1023px) {
+  html {
+    scroll-padding-bottom: 72px;
+  }
+}
+
 body {
   margin: 0;
   background: var(--ink);
