@@ -1,22 +1,22 @@
 /**
- * Contact channels.
- *
- * LinkedIn is verified: it is the profile Shyam named as the source of truth.
- * The rest stay `null` until he supplies them, and every surface that reads
- * this file renders PENDING VERIFICATION rather than inventing a handle.
+ * Contact channels — all supplied by Shyam.
+ * `resume` stays null until a real file or link exists; the final room then
+ * shows it as awaiting rather than linking to something that is not there.
  */
 export interface Contact {
-  linkedin: string | null;
   github: string | null;
   email: string | null;
+  phone: string | null;
+  linkedin: string | null;
   resume: string | null;
 }
 
 export const contact: Contact = {
+  github: 'https://github.com/codepioneer76',
+  email: 'tshyam.s776@gmail.com',
+  phone: '9346454013',
   linkedin: 'https://www.linkedin.com/in/shyam-sai-tatiparti',
-  github: null, // REPLACE_WITH_GITHUB_URL
-  email: null, // REPLACE_WITH_EMAIL
-  resume: null, // REPLACE_WITH_RESUME_URL — e.g. drop resume.pdf into /public and use '/resume.pdf'
+  resume: null, // REPLACE_WITH_RESUME — e.g. put resume.pdf in /public and set '/resume.pdf'
 };
 
 export const PENDING = 'PENDING VERIFICATION' as const;

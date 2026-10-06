@@ -7,11 +7,12 @@ import { Plate, Label, Seal, Pending } from '@/components/Furnishings';
 import { useScrollProgress } from '@/animations/useScrollProgress';
 import { chime } from '@/audio/ambience';
 
-const CHANNELS: { key: keyof typeof contact; label: string; note: string }[] = [
-  { key: 'linkedin', label: 'LINKEDIN', note: 'The public professional record' },
-  { key: 'github', label: 'GITHUB', note: 'Source, as it was written' },
-  { key: 'email', label: 'EMAIL', note: 'Correspondence, at length' },
-  { key: 'resume', label: 'RESUME', note: 'The formal record, on one page' },
+const CHANNELS: { key: keyof typeof contact; label: string; action: string; note: string; href: (v: string) => string; external: boolean }[] = [
+  { key: 'github', label: 'GITHUB', action: 'VIEW GITHUB', note: 'Every public repository', href: (v) => v, external: true },
+  { key: 'email', label: 'EMAIL', action: 'SEND EMAIL', note: 'Correspondence, at length', href: (v) => `mailto:${v}`, external: false },
+  { key: 'phone', label: 'PHONE', action: 'CALL', note: 'For a conversation', href: (v) => `tel:${v}`, external: false },
+  { key: 'linkedin', label: 'LINKEDIN', action: 'VIEW PROFILE', note: 'The public professional record', href: (v) => v, external: true },
+  { key: 'resume', label: 'RESUME', action: 'VIEW RESUME', note: 'The formal record, on one page', href: (v) => v, external: true },
 ];
 
 /**
@@ -98,16 +99,21 @@ export function FinalRoom(): JSX.Element {
                 <div className="mt-5">
                   {value ? (
                     <a
-                      href={c.key === 'email' ? `mailto:${value}` : value}
-                      target={c.key === 'email' ? undefined : '_blank'}
-                      rel="noreferrer"
+                      href={c.href(value)}
+                      target={c.external ? '_blank' : undefined}
+                      rel={c.external ? 'noreferrer' : undefined}
                       onClick={() => chime('door')}
-                      className="break-all font-body text-[13px] tracking-[0.04em] text-[#8B1E2D] underline decoration-[#8B1E2D]/40 underline-offset-4 hover:decoration-[#8B1E2D]"
+                      className="group inline-flex flex-col gap-1.5 py-1"
                     >
-                      {value.replace(/^https?:\/\/(www\.)?/, '')}
+                      <span className="font-body text-[11px] tracking-label text-[#8B1E2D] transition-colors group-hover:text-[#5a1720]">
+                        {c.action} {c.external ? '↗' : '→'}
+                      </span>
+                      <span className="break-all font-body text-[13px] tracking-[0.04em] text-[#2a1c10] underline decoration-[#8B1E2D]/30 underline-offset-4 group-hover:decoration-[#8B1E2D]">
+                        {value.replace(/^https?:\/\/(www\.)?/, '')}
+                      </span>
                     </a>
                   ) : (
-                    <Pending label="NOT YET PUBLISHED" />
+                    <Pending label="AWAITING THE FILE" />
                   )}
                 </div>
               </Plate>

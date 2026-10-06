@@ -78,7 +78,7 @@ export default function Dossier(): JSX.Element {
           {caseFiles.map((c) => (
             <article key={c.id} className="mb-10">
               <h3 className="font-display text-2xl">{c.title}</h3>
-              <p className="mt-1 text-[10.5px] tracking-[0.2em] text-ash">{c.code} · {c.type} · {c.state}</p>
+              <p className="mt-1 text-[10.5px] tracking-[0.2em] text-ash">{c.code} · {c.type} · {c.status}</p>
               <p className="mt-3 max-w-[64ch] text-[12.5px] leading-relaxed text-parchment/80">{c.body}</p>
               {c.stack.length > 0 && (
                 <p className="mt-2 text-[11px] tracking-[0.12em] text-ash">STACK {c.stack.join(', ')}</p>
@@ -143,9 +143,10 @@ export default function Dossier(): JSX.Element {
 
         <Section title="Extraction">
           <ul className="space-y-2 text-[12.5px] text-parchment/80">
-            <li>Email — {contact.email ?? 'pending'}</li>
+            <li>Email — {contact.email ? <a className="underline" href={`mailto:${contact.email}`}>{contact.email}</a> : 'pending'}</li>
+            <li>Phone — {contact.phone ? <a className="underline" href={`tel:${contact.phone}`}>{contact.phone}</a> : 'pending'}</li>
             <li>LinkedIn — {contact.linkedin ?? 'pending'}</li>
-            <li>GitHub — {contact.github ?? 'pending'}</li>
+            <li>GitHub — {contact.github ? <a className="underline" href={contact.github}>{contact.github}</a> : 'pending'}</li>
             <li>Resume — {contact.resume ?? 'pending'}</li>
           </ul>
         </Section>

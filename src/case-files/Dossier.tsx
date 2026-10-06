@@ -4,14 +4,9 @@ import type { CaseFile } from '@/data/caseFiles';
 import { Label, Pending } from '@/components/Furnishings';
 import { chime } from '@/audio/ambience';
 import { ComponentSketch } from './ComponentSketch';
+import { StatusMark } from './StatusMark';
 
 type Stage = 'sealed' | 'cracked' | 'open' | 'read';
-
-/** Components named in each project's own summary, in signal order. */
-const SKETCH: Record<string, string[]> = {
-  pipeguard: ['IoT sensors', 'Telemetry', 'Pressure intel.', 'Prediction', 'Leak detection'],
-  riversight: ['IoT sensors', 'Telemetry', 'Dashboard', 'GIS map', 'Alerts'],
-};
 
 /**
  * A project dossier: a leather folder, clipped and sealed.
@@ -100,16 +95,18 @@ export function Dossier({ file }: { file: CaseFile }): JSX.Element {
                   <h3 className="font-display mt-3 text-[clamp(34px,5.6vw,64px)] leading-none text-ivory">{file.title}</h3>
                   <p className="font-body mt-3 text-[11px] tracking-label text-parchment/55">{file.type}</p>
                 </div>
-                {/* stamped status */}
-                <span
-                  className="font-display rotate-[-6deg] border-2 px-3 py-1.5 text-[14px] tracking-[0.2em]"
-                  style={{ borderColor: 'rgba(139,30,45,.7)', color: 'rgba(170,52,66,.85)' }}
-                >
-                  {file.state}
-                </span>
+                <StatusMark status={file.status} stamp />
               </div>
 
-              <p className="font-display max-w-[58ch] text-[16px] italic leading-relaxed text-parchment/75">{file.summary}</p>
+              <div>
+                <p className="font-display max-w-[58ch] text-[16px] italic leading-relaxed text-parchment/75">{file.summary}</p>
+                {file.role && (
+                  <p className="font-body mt-3 text-[11px] tracking-[0.14em] text-gold/75">
+                    <span className="text-parchment/45">ROLE · </span>
+                    {file.role}
+                  </p>
+                )}
+              </div>
 
               <div className="flex items-center gap-5">
                 <button
@@ -168,7 +165,7 @@ export function Dossier({ file }: { file: CaseFile }): JSX.Element {
               </p>
 
               <div className="mt-6">
-                <ComponentSketch nodes={SKETCH[file.id] ?? []} drawn={stage === 'read'} />
+                <ComponentSketch nodes={file.sketch} drawn={stage === 'read'} />
               </div>
 
               <div className="mt-8 grid gap-7 md:grid-cols-[180px_minmax(0,1fr)]">
@@ -216,9 +213,26 @@ export function Dossier({ file }: { file: CaseFile }): JSX.Element {
                 </div>
               </div>
 
-              <footer className="mt-8 flex flex-wrap gap-6 border-t border-[#8a6a3a]/30 pt-5">
-                <span className="font-body text-[10.5px] tracking-label text-[#5a4326]">SOURCE {file.links.github ?? '— PENDING'}</span>
-                <span className="font-body text-[10.5px] tracking-label text-[#5a4326]">DEMONSTRATION {file.links.demo ?? '— PENDING'}</span>
+              <footer className="mt-8 flex flex-wrap items-center gap-6 border-t border-[#8a6a3a]/30 pt-5">
+                {file.links.github ? (
+                  <a
+                    href={file.links.github}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center gap-2 border-b border-[#8B1E2D]/50 py-2 font-body text-[10.5px] tracking-label text-[#8B1E2D] transition-colors hover:border-[#8B1E2D]"
+                  >
+                    VIEW SOURCE ON GITHUB ↗
+                  </a>
+                ) : (
+                  <span className="font-body text-[10.5px] tracking-label text-[#5a4326]">SOURCE — NOT PUBLIC</span>
+                )}
+                {file.links.demo ? (
+                  <a href={file.links.demo} target="_blank" rel="noreferrer" className="py-2 font-body text-[10.5px] tracking-label text-[#8B1E2D]">
+                    LIVE DEMO ↗
+                  </a>
+                ) : (
+                  <span className="font-body text-[10.5px] tracking-label text-[#5a4326]/80">NO LIVE DEMO</span>
+                )}
               </footer>
             </div>
           </div>

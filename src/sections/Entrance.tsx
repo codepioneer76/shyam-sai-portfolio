@@ -114,7 +114,7 @@ export function Entrance(): JSX.Element {
             <span className="text-[0.62em] tracking-[0.06em] text-parchment/90">TATIPARTI</span>
           </h1>
           <div className="rule-gold mx-auto mt-8 w-[min(420px,64vw)]" style={{ opacity: stage > 2 ? 1 : 0, transition: 'opacity 2.2s ease' }} />
-          <p className="font-body mt-6 text-[12px] tracking-royal text-parchment/85 md:text-[13px]" style={{ opacity: stage > 2 ? 1 : 0, transition: 'opacity 2s ease' }}>
+          <p className="font-display mt-7 text-[clamp(17px,2.4vw,26px)] tracking-[0.32em] text-gold" style={{ opacity: stage > 2 ? 1 : 0, transition: 'opacity 2s ease', textShadow: '0 0 30px rgba(201,164,92,.25)' }}>
             {profile.discipline}
           </p>
           <p
@@ -196,16 +196,23 @@ export function Entrance(): JSX.Element {
                   </div>
                 ))}
               </dl>
-              {contact.linkedin && (
-                <a
-                  href={contact.linkedin}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="mt-5 inline-block py-2 font-body text-[11px] tracking-label text-[#8B1E2D] underline decoration-[#8B1E2D]/40 underline-offset-4 hover:decoration-[#8B1E2D]"
-                >
-                  PUBLIC PROFILE ON LINKEDIN ↗
-                </a>
-              )}
+              <div className="mt-6 flex flex-wrap gap-x-6 gap-y-1">
+                {contact.github && (
+                  <a href={contact.github} target="_blank" rel="noreferrer" className="py-2 font-body text-[11px] tracking-label text-[#8B1E2D] underline decoration-[#8B1E2D]/40 underline-offset-4 hover:decoration-[#8B1E2D]">
+                    GITHUB ↗
+                  </a>
+                )}
+                {contact.email && (
+                  <a href={`mailto:${contact.email}`} className="py-2 font-body text-[11px] tracking-label text-[#8B1E2D] underline decoration-[#8B1E2D]/40 underline-offset-4 hover:decoration-[#8B1E2D]">
+                    EMAIL
+                  </a>
+                )}
+                {contact.linkedin && (
+                  <a href={contact.linkedin} target="_blank" rel="noreferrer" className="py-2 font-body text-[11px] tracking-label text-[#8B1E2D] underline decoration-[#8B1E2D]/40 underline-offset-4 hover:decoration-[#8B1E2D]">
+                    LINKEDIN ↗
+                  </a>
+                )}
+              </div>
             </Plate>
 
             <div className="grid gap-8 sm:grid-cols-2">
@@ -236,19 +243,25 @@ export function Entrance(): JSX.Element {
 
             {attachments.map((a) => (
               <Plate key={a.id} className="p-7" delay={340}>
-                <Label className="text-[#7a5a30]">EXPERIENCE ON RECORD</Label>
+                <Label className="text-[#7a5a30]">EXPERIENCE</Label>
                 <h4 className="font-display mt-3 text-[22px] leading-tight text-[#2a1c10]">
                   {a.institution}
                   <span className="block text-[15px] tracking-[0.1em] text-[#6a4b28]">{a.place}</span>
                 </h4>
                 <Rule className="my-5 opacity-40" />
-                <div className="flex flex-wrap items-center gap-4">
-                  <span className="font-body text-[10.5px] tracking-label text-[#7a5a30]">ROLE & RESPONSIBILITIES</span>
-                  <Pending />
-                </div>
-                <p className="font-body mt-4 max-w-[52ch] text-[12.5px] italic leading-relaxed text-[#5a4326]">
-                  The institution appears on the public profile. Nothing further is claimed until it is confirmed.
-                </p>
+                {a.role ? (
+                  <p className="font-body max-w-[56ch] text-[14px] leading-relaxed text-[#3a2a18]">{a.role}</p>
+                ) : (
+                  <>
+                    <div className="flex flex-wrap items-center gap-4">
+                      <span className="font-body text-[10.5px] tracking-label text-[#7a5a30]">ROLE & RESPONSIBILITIES</span>
+                      <Pending />
+                    </div>
+                    <p className="font-body mt-4 max-w-[52ch] text-[12.5px] italic leading-relaxed text-[#5a4326]">
+                      The institution appears on the public profile. Nothing further is claimed until it is confirmed.
+                    </p>
+                  </>
+                )}
               </Plate>
             ))}
           </div>

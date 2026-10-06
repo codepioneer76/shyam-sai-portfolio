@@ -3,7 +3,7 @@ import { useEffect, useMemo, useRef } from 'react';
 import { Canvas, useFrame, useThree, type ThreeEvent } from '@react-three/fiber';
 import * as THREE from 'three';
 import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
-import { arsenal, type ArsenalItem } from '@/data/arsenal';
+import { itemsInTray, type ArsenalItem } from '@/data/arsenal';
 import { actions, useStore, type CaseStage } from '@/state/store';
 import { chime } from '@/audio/ambience';
 import { releaseLatch } from './caseMachine';
@@ -433,33 +433,89 @@ function TravellingCase({ tier, reduced, active }: CaseProps): JSX.Element {
 /* ------------------------------------------------------------------ contents */
 
 const COLS = 4;
-const ROWS = 4;
+const ROWS = 2;
 const IN_W = W - WALL * 2 - 0.08;
 const IN_D = D - WALL * 2 - 0.08;
 const CELL_W = IN_W / COLS;
 const CELL_D = IN_D / ROWS;
 
+interface Placed {
+  item: ArsenalItem;
+  col: number;
+  row: number;
+}
+
+/** Pack a tray's objects into the 4 × 2 grid in order, honouring wide objects. */
+function pack(items: ArsenalItem[]): Placed[] {
+  const taken = Array.from({ length: ROWS }, () => Array<boolean>(COLS).fill(false));
+  const out: Placed[] = [];
+  for (const item of items) {
+    const [sw, sh] = item.span;
+    let placed = false;
+    for (let r = 0; r <= ROWS - sh && !placed; r++) {
+      for (let c = 0; c <= COLS - sw && !placed; c++) {
+        let free = true;
+        for (let y = r; y < r + sh; y++) for (let x = c; x < c + sw; x++) if (taken[y][x]) free = false;
+        if (!free) continue;
+        for (let y = r; y < r + sh; y++) for (let x = c; x < c + sw; x++) taken[y][x] = true;
+        out.push({ item, col: c, row: r });
+        placed = true;
+      }
+    }
+  }
+  return out;
+}
+
+/**
+ * The lifted tray. Velvet dividers follow the actual objects, so a wide
+ * compartment (Python) has no divider running through it. Switching trays
+ * remounts the contents, which replays the settle-in stagger — quickly, since
+ * the lid is already open.
+ */
 function Contents({ kit, open }: { kit: Kit; open: boolean }): JSX.Element {
+  const tray = useStore((s) => s.tray);
+  const revealed = useRef(false);
+  if (!open) revealed.current = false;
+  const baseDelay = revealed.current ? 0.06 : 0.55;
+  if (open) revealed.current = true;
+
+  const placed = useMemo(() => pack(itemsInTray(tray)), [tray]);
+
   const dividers = useMemo(() => {
     const list: { pos: [number, number, number]; scale: [number, number, number] }[] = [];
-    for (let c = 1; c < COLS; c++) list.push({ pos: [-IN_W / 2 + c * CELL_W, FLOOR + 0.06, 0], scale: [0.016, 0.1, IN_D] });
+    const spans = (line: number, row: number): boolean =>
+      placed.some((p) => p.row <= row && row < p.row + p.item.span[1] && p.col < line && line < p.col + p.item.span[0]);
+    for (let c = 1; c < COLS; c++) {
+      for (let r = 0; r < ROWS; r++) {
+        if (spans(c, r)) continue;
+        list.push({ pos: [-IN_W / 2 + c * CELL_W, FLOOR + 0.06, -IN_D / 2 + CELL_D * (r + 0.5)], scale: [0.016, 0.1, CELL_D] });
+      }
+    }
     for (let r = 1; r < ROWS; r++) list.push({ pos: [0, FLOOR + 0.06, -IN_D / 2 + r * CELL_D], scale: [IN_W, 0.1, 0.016] });
     return list;
-  }, []);
+  }, [placed]);
 
   return (
-    <group>
+    <group key={tray}>
       {dividers.map((d, i) => (
         <mesh key={i} material={kit.velvet} position={d.pos} scale={d.scale} castShadow receiveShadow>
           <boxGeometry args={[1, 1, 1]} />
         </mesh>
       ))}
-      {arsenal.slice(0, COLS * ROWS).map((item, i) => {
-        const col = i % COLS;
-        const row = Math.floor(i / COLS);
-        const x = -IN_W / 2 + CELL_W * (col + 0.5);
-        const z = -IN_D / 2 + CELL_D * (row + 0.5);
-        return <Artifact key={item.id} item={item} kit={kit} position={[x, FLOOR + 0.014, z]} index={i} open={open} />;
+      {placed.map((p, i) => {
+        const x = -IN_W / 2 + CELL_W * (p.col + p.item.span[0] / 2);
+        const z = -IN_D / 2 + CELL_D * (p.row + p.item.span[1] / 2);
+        return (
+          <Artifact
+            key={p.item.id}
+            item={p.item}
+            kit={kit}
+            position={[x, FLOOR + 0.014, z]}
+            index={i}
+            open={open}
+            baseDelay={baseDelay}
+          />
+        );
       })}
     </group>
   );
@@ -479,16 +535,19 @@ function Artifact({
   position,
   index,
   open,
+  baseDelay,
 }: {
   item: ArsenalItem;
   kit: Kit;
   position: [number, number, number];
   index: number;
   open: boolean;
+  baseDelay: number;
 }): JSX.Element {
   const selected = useStore((s) => s.artifact?.id === item.id);
-  const w = CELL_W * 0.84;
-  const d = CELL_D * 0.8;
+  const w = CELL_W * item.span[0] * 0.86 - (item.span[0] > 1 ? 0.02 : 0);
+  const d = CELL_D * item.span[1] * 0.74;
+  const primary = item.state === 'PRIMARY';
   const h = item.kind === 'ledger' ? 0.12 : item.kind === 'volume' ? 0.09 : item.kind === 'manuscript' ? 0.1 : 0.035;
 
   const res = useMemo(() => {
@@ -527,7 +586,7 @@ function Artifact({
     // STEP 6 — objects settle into view in a stagger, only once the lid is clear of them
     if (open && openedAt.current === null) openedAt.current = t;
     if (!open) openedAt.current = null;
-    const due = openedAt.current !== null && t - openedAt.current > 0.55 + index * 0.035;
+    const due = openedAt.current !== null && t - openedAt.current > baseDelay + index * 0.045;
     reveal.current += ((due ? 1 : 0) - reveal.current) * Math.min(1, dt * 5);
     const active = hover.current || selected;
     lift.current += ((active && open ? 1 : 0) - lift.current) * Math.min(1, dt * 12);
@@ -572,6 +631,16 @@ function Artifact({
   return (
     <group ref={g} position={position} {...handlers}>
       <mesh geometry={res.body} material={res.faces} position={[0, h / 2, 0]} castShadow receiveShadow />
+      {primary && (
+        // the primary language sits in a brass-framed compartment of its own
+        <group position={[0, h + 0.004, 0]}>
+          {([[0, d / 2, w + 0.03, 0.014], [0, -d / 2, w + 0.03, 0.014], [w / 2, 0, 0.014, d], [-w / 2, 0, 0.014, d]] as const).map(([x, z, sx, sz], k) => (
+            <mesh key={k} material={kit.brass} position={[x, 0, z]} castShadow>
+              <boxGeometry args={[sx, 0.012, sz]} />
+            </mesh>
+          ))}
+        </group>
+      )}
     </group>
   );
 }

@@ -1,48 +1,64 @@
 'use client';
-import { arsenal } from '@/data/arsenal';
+import { itemsInTray, trays } from '@/data/arsenal';
 import { actions, useStore } from '@/state/store';
 import { chime } from '@/audio/ambience';
 
 /**
- * The record that comes out with an object, plus the case's manifest.
+ * The case's manifest and the record that comes out with an object.
  *
- * The manifest is the keyboard path into the case: every object inside is
- * also a button here, so nothing is reachable only by pointing at a canvas.
+ * The manifest lists every object, tray by tray, so the whole stack can be
+ * read at a glance without lifting a thing — and it is the keyboard path into
+ * the case: choosing an object here lifts its tray and opens its record.
  */
 export function SkillRecord(): JSX.Element | null {
   const open = useStore((s) => s.caseStage === 'open');
   const item = useStore((s) => s.artifact);
+  const tray = useStore((s) => s.tray);
   if (!open) return null;
 
   return (
-    <div className="mx-auto mt-10 grid max-w-5xl gap-8 md:grid-cols-[minmax(0,1fr)_minmax(0,1.3fr)]">
+    <div className="mx-auto mt-10 grid max-w-5xl gap-8 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)]">
       {/* manifest */}
       <nav aria-label="Contents of the case" className="border-t border-gold/20 pt-5">
         <p className="font-body text-[10px] tracking-label text-gold/75">MANIFEST</p>
-        <ul className="mt-4 grid grid-cols-2 gap-x-6 gap-y-1.5">
-          {arsenal.map((a) => (
-            <li key={a.id}>
-              <button
-                onClick={() => {
-                  actions.setArtifact(a);
-                  chime('folder');
-                }}
-                aria-pressed={item?.id === a.id}
-                className={`w-full text-left font-body text-[11px] tracking-[0.12em] transition-colors ${
-                  item?.id === a.id ? 'text-gold' : 'text-parchment/65 hover:text-ivory'
-                }`}
-              >
-                {a.name}
-              </button>
-            </li>
+        <div className="mt-4 grid gap-x-8 gap-y-6 sm:grid-cols-2">
+          {trays.map((t) => (
+            <div key={t.id}>
+              <p className={`font-body text-[9.5px] tracking-[0.24em] ${t.id === tray ? 'text-gold' : 'text-parchment/40'}`}>{t.label}</p>
+              <ul className="mt-2 space-y-0.5">
+                {itemsInTray(t.id).map((a) => {
+                  const on = item?.id === a.id;
+                  const primary = a.state === 'PRIMARY';
+                  return (
+                    <li key={a.id}>
+                      <button
+                        onClick={() => {
+                          actions.setArtifact(a);
+                          chime('folder');
+                        }}
+                        aria-pressed={on}
+                        className={`flex w-full items-baseline justify-between gap-3 py-1 text-left transition-colors ${
+                          on ? 'text-gold' : primary ? 'text-ivory hover:text-gold' : 'text-parchment/70 hover:text-ivory'
+                        }`}
+                      >
+                        <span className={`font-body tracking-[0.1em] ${primary ? 'text-[13px] font-semibold' : 'text-[11.5px]'}`}>{a.name}</span>
+                        <span className={`shrink-0 font-body text-[8.5px] tracking-[0.16em] ${primary ? 'text-gold' : 'text-parchment/35'}`}>
+                          {primary ? 'PRIMARY' : a.state}
+                        </span>
+                      </button>
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
           ))}
-        </ul>
+        </div>
       </nav>
 
       {/* the record */}
       <div
         key={item?.id ?? 'none'}
-        className="parchment-surface relative min-h-[220px] rounded-[2px] p-7 md:p-9"
+        className="parchment-surface relative h-fit min-h-[220px] rounded-[2px] p-7 md:p-9 lg:sticky lg:top-24"
         style={{ animation: item ? 'recordIn .6s cubic-bezier(.22,1,.36,1) both' : undefined }}
         aria-live="polite"
       >
@@ -54,7 +70,7 @@ export function SkillRecord(): JSX.Element | null {
             <dl className="space-y-5">
               <div>
                 <dt className="font-body text-[9.5px] tracking-label text-[#7a5a30]">STATE</dt>
-                <dd className="font-display mt-1 text-[17px] text-[#8B1E2D]">{item.state}</dd>
+                <dd className="font-display mt-1 text-[17px] text-[#8B1E2D]">{item.state === 'PRIMARY' ? 'PRIMARY LANGUAGE' : item.state}</dd>
               </div>
               <div>
                 <dt className="font-body text-[9.5px] tracking-label text-[#7a5a30]">CURRENT USE</dt>
@@ -73,7 +89,7 @@ export function SkillRecord(): JSX.Element | null {
             </dl>
           </>
         ) : (
-          <p className="font-display text-[17px] italic text-[#5a4326]">Lift something out of the case.</p>
+          <p className="font-display text-[17px] italic text-[#5a4326]">Lift something out of the case, or choose it from the manifest.</p>
         )}
       </div>
     </div>

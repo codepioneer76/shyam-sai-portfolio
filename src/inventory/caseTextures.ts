@@ -131,6 +131,7 @@ export function velvet(size: number): THREE.CanvasTexture {
 }
 
 const STATE_INK: Record<ArsenalItem['state'], string> = {
+  PRIMARY: '#7a5418',
   USED: '#2a1c10',
   'BUILDING WITH': '#5a1720',
   'CURRENT FOCUS': '#8B1E2D',
@@ -162,22 +163,45 @@ export function objectLabel(item: ArsenalItem, w: number, h: number): THREE.Canv
   x.lineWidth = 3;
   x.strokeRect(14, 14, W - 28, H - 28);
 
-  // name
+  // name — large, and broken onto two lines at a word boundary rather than
+  // shrunk until a long name ('AGENT ORCHESTRATION') becomes unreadable
   x.fillStyle = '#2a1c10';
   x.textAlign = 'center';
   x.textBaseline = 'middle';
-  let fs = Math.min(64, H * 0.3);
-  x.font = `600 ${fs}px Didot, "Bodoni MT", Georgia, serif`;
-  while (x.measureText(item.name).width > W - 70 && fs > 20) {
-    fs -= 2;
-    x.font = `600 ${fs}px Didot, "Bodoni MT", Georgia, serif`;
+  const face = (size: number): string => `600 ${size}px Didot, "Bodoni MT", Georgia, serif`;
+  const maxW = W - 64;
+  const words = item.name.split(' ');
+  let lines = [item.name];
+  let fs = Math.min(item.state === 'PRIMARY' ? 104 : 92, H * 0.26);
+  x.font = face(fs);
+  if (x.measureText(item.name).width > maxW && words.length > 1) {
+    // choose the split that balances the two lines best
+    let best = 1;
+    let bestDiff = Infinity;
+    for (let i = 1; i < words.length; i++) {
+      const a = x.measureText(words.slice(0, i).join(' ')).width;
+      const b = x.measureText(words.slice(i).join(' ')).width;
+      if (Math.abs(a - b) < bestDiff) {
+        bestDiff = Math.abs(a - b);
+        best = i;
+      }
+    }
+    lines = [words.slice(0, best).join(' '), words.slice(best).join(' ')];
+    fs = Math.min(fs, H * 0.2);
   }
-  x.fillText(item.name, W / 2, H * 0.44);
+  x.font = face(fs);
+  while (lines.some((l) => x.measureText(l).width > maxW) && fs > 28) {
+    fs -= 2;
+    x.font = face(fs);
+  }
+  const lineH = fs * 1.08;
+  const top = H * 0.44 - ((lines.length - 1) * lineH) / 2;
+  lines.forEach((l, i) => x.fillText(l, W / 2, top + i * lineH));
 
-  // state, small caps in ink appropriate to it
+  // state, in small caps, in the ink appropriate to it
   x.fillStyle = STATE_INK[item.state];
-  x.font = `500 ${Math.max(16, fs * 0.36)}px Georgia, serif`;
-  x.fillText(item.state.split('').join(' '), W / 2, H * 0.74);
+  x.font = `600 ${Math.max(24, Math.min(34, fs * 0.36))}px Georgia, serif`;
+  x.fillText((item.state === 'PRIMARY' ? 'PRIMARY LANGUAGE' : item.state).split('').join(' '), W / 2, H * 0.8);
 
   const t = new THREE.CanvasTexture(c);
   t.colorSpace = THREE.SRGBColorSpace;

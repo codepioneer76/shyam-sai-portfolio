@@ -15,25 +15,44 @@ export function Index(): JSX.Element {
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
-    const els = chapters.map((c) => document.getElementById(c.id)).filter((el): el is HTMLElement => el !== null);
-    const io = new IntersectionObserver(
-      (entries) => {
-        const top = entries.filter((e) => e.isIntersecting).sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
-        if (top) {
-          const id = top.target.id as ChapterId;
-          actions.setChapter(id);
-          audio.setRoom(id);
+    /**
+     * The current room is the one holding the middle of the screen. Visibility
+     * ratios fail here: once a room is taller than the viewport (Projects now
+     * is), its ratio stays small and a neighbouring room keeps winning.
+     */
+    let frame = 0;
+    let queued = false;
+    let last: ChapterId | null = null;
+    const measure = (): void => {
+      queued = false;
+      const mid = window.innerHeight * 0.45;
+      for (const c of chapters) {
+        const el = document.getElementById(c.id);
+        if (!el) continue;
+        const r = el.getBoundingClientRect();
+        if (r.top <= mid && r.bottom > mid) {
+          if (c.id !== last) {
+            last = c.id;
+            actions.setChapter(c.id);
+            audio.setRoom(c.id);
+          }
+          break;
         }
-      },
-      { threshold: [0.1, 0.3, 0.6], rootMargin: '-25% 0px -35% 0px' },
-    );
-    els.forEach((el) => io.observe(el));
-    const onScroll = (): void => setVisible(window.scrollY > window.innerHeight * 0.6);
-    onScroll();
+      }
+      setVisible(window.scrollY > window.innerHeight * 0.6);
+    };
+    const onScroll = (): void => {
+      if (queued) return;
+      queued = true;
+      frame = requestAnimationFrame(measure);
+    };
+    measure();
     window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll);
     return () => {
-      io.disconnect();
+      cancelAnimationFrame(frame);
       window.removeEventListener('scroll', onScroll);
+      window.removeEventListener('resize', onScroll);
     };
   }, []);
 

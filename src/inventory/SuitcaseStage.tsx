@@ -6,6 +6,7 @@ import type { Tier } from './Suitcase3D';
 import { useStore } from '@/state/store';
 import { closeCase, releaseNext } from './caseMachine';
 import { SkillRecord } from './SkillRecord';
+import { TraySelector } from './TraySelector';
 
 /** The 3D case is its own chunk: it is not downloaded until the visitor is a room away. */
 const Suitcase3D = dynamic(() => import('./Suitcase3D'), {
@@ -168,6 +169,7 @@ export function SuitcaseStage(): JSX.Element {
         </div>
       </div>
 
+      <TraySelector />
       <SkillRecord />
     </div>
   );

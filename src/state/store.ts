@@ -1,6 +1,6 @@
 'use client';
 import { useSyncExternalStore } from 'react';
-import type { ArsenalItem } from '@/data/arsenal';
+import type { ArsenalItem, TrayId } from '@/data/arsenal';
 import type { ChapterId } from '@/data/chapters';
 
 export type Overlay = 'none' | 'map' | 'ask';
@@ -18,6 +18,8 @@ interface State {
   latchL: boolean;
   latchR: boolean;
   artifact: ArsenalItem | null;
+  /** Which tray of the case is lifted. */
+  tray: TrayId;
   chapter: ChapterId;
   sound: boolean;
   archived: boolean;
@@ -30,6 +32,7 @@ const initial: State = {
   latchL: false,
   latchR: false,
   artifact: null,
+  tray: 'programming',
   chapter: 'entrance',
   sound: false,
   archived: false,
@@ -57,7 +60,9 @@ export const actions = {
   toggleOverlay: (overlay: Overlay): void => set({ overlay: state.overlay === overlay ? 'none' : overlay }),
   setCaseStage: (caseStage: CaseStage): void => set({ caseStage, artifact: caseStage === 'open' ? state.artifact : null }),
   setLatches: (latchL: boolean, latchR: boolean): void => set({ latchL, latchR }),
-  setArtifact: (artifact: ArsenalItem | null): void => set({ artifact }),
+  /** Lifting an object from another tray brings that tray up first. */
+  setArtifact: (artifact: ArsenalItem | null): void => set(artifact ? { artifact, tray: artifact.tray } : { artifact }),
+  setTray: (tray: TrayId): void => set({ tray, artifact: state.artifact?.tray === tray ? state.artifact : null }),
   setChapter: (chapter: ChapterId): void => set({ chapter }),
   setSound: (sound: boolean): void => set({ sound }),
   archive: (): void => set({ archived: true }),

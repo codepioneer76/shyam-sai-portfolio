@@ -1,6 +1,6 @@
 'use client';
 import { useEffect, useRef, useState } from 'react';
-import { arsenal, type ArsenalItem } from '@/data/arsenal';
+import { itemsInTray, type ArsenalItem } from '@/data/arsenal';
 import { stepSpring, type SpringState } from '@/animations/spring';
 import { actions, useStore } from '@/state/store';
 import { chime } from '@/audio/ambience';
@@ -21,6 +21,7 @@ export function Case(): JSX.Element {
   const latchL = useStore((s) => s.latchL);
   const latchR = useStore((s) => s.latchR);
   const selected = useStore((s) => s.artifact);
+  const tray = useStore((s) => s.tray);
   const select = actions.setArtifact;
 
   const [lid, setLid] = useState(0);
@@ -122,11 +123,12 @@ export function Case(): JSX.Element {
                 aria-hidden
               />
               <div
-                className="grid h-full grid-cols-2 gap-2.5 transition-opacity duration-700 sm:grid-cols-3 md:grid-cols-4 md:gap-3"
+                key={tray}
+                className="grid h-full grid-cols-2 grid-rows-4 gap-2.5 transition-opacity duration-700 sm:grid-cols-4 sm:grid-rows-2 md:gap-3"
                 style={{ opacity: interior }}
                 aria-hidden={!open}
               >
-                {arsenal.map((item, i) => (
+                {itemsInTray(tray).map((item, i) => (
                   <Artifact
                     key={item.id}
                     item={item}
@@ -217,7 +219,7 @@ function Artifact({
       onClick={onSelect}
       tabIndex={shown ? 0 : -1}
       aria-label={`${item.name} — ${item.cat}`}
-      className="group relative block h-full w-full text-left"
+      className={`group relative block h-full w-full text-left ${item.span[0] > 1 ? 'col-span-2' : ''}`}
       style={{
         transform: shown ? 'translateY(0)' : 'translateY(10px)',
         opacity: shown ? 1 : 0,
@@ -234,19 +236,27 @@ function Artifact({
           transform: active ? 'translateY(-5px) rotate(-0.5deg)' : 'none',
           boxShadow: active
             ? '0 10px 22px rgba(0,0,0,.7), 0 0 0 1px rgba(201,164,92,.55)'
-            : '0 4px 10px rgba(0,0,0,.6), inset 0 1px 0 rgba(255,255,255,.05)',
+            : item.state === 'PRIMARY'
+              ? '0 4px 10px rgba(0,0,0,.6), inset 0 0 0 2px rgba(201,164,92,.7)'
+              : '0 4px 10px rgba(0,0,0,.6), inset 0 1px 0 rgba(255,255,255,.05)',
         }}
       >
         <span className="flex h-full flex-col justify-between">
           <span className="block">
             <span className="block h-px w-full bg-gold/35" />
-            <span className="mt-2 block font-display text-[12.5px] leading-tight text-ivory/95 md:text-[13.5px]">
+            <span
+              className={`mt-2 block font-display leading-tight ${
+                item.state === 'PRIMARY' ? 'text-[18px] text-gold md:text-[22px]' : 'text-[13px] text-ivory/95 md:text-[14.5px]'
+              }`}
+            >
               {item.name}
             </span>
           </span>
           <span className="block">
             <span className="block font-body text-[9px] tracking-label text-gold/60">{form.label}</span>
-            <span className="mt-1 block font-body text-[8.5px] tracking-label text-parchment/70">{item.state}</span>
+            <span className={`mt-1 block font-body text-[9px] tracking-label ${item.state === 'PRIMARY' ? 'text-gold' : 'text-parchment/70'}`}>
+              {item.state === 'PRIMARY' ? 'PRIMARY LANGUAGE' : item.state}
+            </span>
           </span>
         </span>
       </span>

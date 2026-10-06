@@ -8,18 +8,18 @@ import { contact } from './contact';
 export const profile = {
   fullName: 'SHYAM SAI TATIPARTI',
   name: 'SHYAM SAI',
-  classification: 'AI / ML ENGINEER',
+  classification: 'ASPIRING AI ENGINEER',
   /** The one-line identity under the name. Chosen to describe the work, not a job title he does not hold. */
-  discipline: 'AI / SOFTWARE ENGINEERING',
+  discipline: 'ASPIRING AI ENGINEER',
   /** Short factual introduction for the entrance. Every clause is on the record. */
   introduction:
-    'Computer Science undergraduate at Gayatri Vidya Parishad College of Engineering, Visakhapatnam. Builds web platforms for monitoring physical systems, and is working towards machine learning, LLM systems and retrieval.',
+    'Computer Science undergraduate at GVPCE, Visakhapatnam, building toward AI engineering — through machine learning, software engineering, and the agentic and intelligent systems that join them. Currently building AURA.',
   status: 'ACTIVE',
   degree: 'B.Tech — Computer Science Engineering',
   institution: 'Gayatri Vidya Parishad College of Engineering (Autonomous)',
   location: 'Visakhapatnam, Andhra Pradesh',
   years: '2024 — 2028',
-  positioning: 'Computer science undergraduate building intelligent systems from data, models and code.',
+  positioning: 'Aspiring AI engineer. Builds intelligent systems from data, models and code — and is building AURA, an autonomous AI research and engineering platform.',
   focus: [
     'Artificial Intelligence',
     'Machine Learning',
@@ -38,6 +38,14 @@ export const profile = {
  * than guessed at. An unfilled field is worth more than a plausible invention.
  */
 export const attachments = [
+  {
+    id: 'aicte-php',
+    institution: 'AICTE · INTERNSHIP',
+    place: 'FULL STACK PHP DEVELOPMENT WITH PROJECT',
+    role: 'Intern — built an Online Food Ordering System as the internship project.' as string | null,
+    period: null as string | null,
+    responsibilities: null as string | null,
+  },
   {
     id: 'iitkgp',
     institution: 'INDIAN INSTITUTE OF TECHNOLOGY',

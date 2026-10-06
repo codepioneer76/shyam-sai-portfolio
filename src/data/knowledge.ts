@@ -6,6 +6,8 @@ import { foundation } from './foundation';
 import { journey } from './journey';
 import { research } from './research';
 import { buildStages } from './build';
+import { aura } from './aura';
+import { trays } from './arsenal';
 import { languages, attachments } from './profile';
 import { credentials } from './archive';
 import { experiments } from './lab';
@@ -47,7 +49,7 @@ export function buildCorpus(): Passage[] {
     p.push({
       id: `case:${c.id}`,
       source: `CASE FILE ${c.code}`,
-      text: `${c.title} (${c.code}) is a ${c.type} project, status ${c.state}. ${c.body}${c.stack.length ? ` Stack: ${c.stack.join(', ')}.` : ' Stack not yet recorded.'}`,
+      text: `${c.title} (${c.code}) is a ${c.type} project, status ${c.status}. ${c.body}${c.role ? ` Shyam's role: ${c.role}` : ''}${c.stack.length ? ` Stack: ${c.stack.join(', ')}.` : ''}${c.links.github ? ` Repository: ${c.links.github}.` : ''}`,
     });
     c.sections.forEach((s) => {
       if (s.body) p.push({ id: `case:${c.id}:${s.key}`, source: `${c.title} / ${s.key}`, text: `${c.title} — ${s.key}: ${s.body}` });
@@ -100,11 +102,23 @@ export function buildCorpus(): Passage[] {
     p.push({ id: `system:${s.id}`, source: 'SYSTEM', text: `Engineering position — ${s.name}: ${s.body}` }),
   );
 
+  p.push({
+    id: 'aura',
+    source: 'FLAGSHIP · AURA',
+    text: `AURA — ${aura.title} — is Shyam's flagship project, status ${aura.status}. ${aura.vision} Designed layers: ${aura.layers.map((l) => l.name).join(', ')}; cross-cutting: ${aura.crossCutting.join(', ')}; data: ${aura.data.join(', ')}. The repository is not yet public.`,
+  });
+
+  p.push({
+    id: 'skills-overview',
+    source: 'SKILL SET',
+    text: `Python is Shyam's primary programming language. He also uses C++, Java, C, SQL, PHP, and HTML/CSS/Bootstrap. Skill trays: ${trays.map((t) => t.label).join(', ')}.`,
+  });
+
   const c = contact;
   p.push({
     id: 'contact',
     source: 'EXTRACTION',
-    text: `Contact channels. Email: ${c.email ?? 'not yet published'}. LinkedIn: ${c.linkedin ?? 'not yet published'}. GitHub: ${c.github ?? 'not yet published'}. Resume: ${c.resume ?? 'not yet published'}.`,
+    text: `How to contact Shyam. Email: ${c.email ?? 'not yet published'}. Phone: ${c.phone ?? 'not yet published'}. GitHub: ${c.github ?? 'not yet published'}. LinkedIn: ${c.linkedin ?? 'not yet published'}. Resume: ${c.resume ?? 'not yet published'}.`,
   });
 
   return p;
