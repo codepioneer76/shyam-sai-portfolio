@@ -2,7 +2,7 @@
   "name": "shyam-sai-portfolio",
   "version": "0.1.0",
   "private": true,
-  "description": "Shyam Sai — The Royal Archive: a gothic-castle portfolio for an AI/ML engineer",
+  "description": "Shyam Sai \u2014 The Royal Archive: a gothic-castle portfolio for an AI/ML engineer",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -31,6 +31,6 @@
     "typescript": "5.5.4"
   },
   "engines": {
-    "node": ">=18.17"
+    "node": "22.x"
   }
 }
